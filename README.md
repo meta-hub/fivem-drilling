@@ -15,3 +15,8 @@ RegisterCommand('sf_drilling', function(...)
     end
   end)
 end)
+```
+
+# Preview Image
+- Note: Image from GTAV.
+![Image of Drilling](https://www.gadgetreview.com/wp-content/uploads/2016/07/the_fleeca_job_3.jpg)
