@@ -1,3 +1,5 @@
+Scaleforms = exports["meta_libs"]:Scaleforms()
+
 Drilling = {}
 
 Drilling.DisabledControls = {30,31,32,33,34,35}
