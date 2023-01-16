@@ -18,12 +18,11 @@ Drilling.Init = function()
   end
 
   Drilling.Scaleform = Scaleforms.LoadMovie("DRILLING")
-
   
   Drilling.DrillSpeed = 0.0
   Drilling.DrillPos   = 0.0
   Drilling.DrillTemp  = 0.0
-  Drilling.HoleDepth  = 0.0
+  Drilling.HoleDepth  = 0.1
   
 
   Scaleforms.PopFloat(Drilling.Scaleform,"SET_SPEED",           0.0)
@@ -48,6 +47,7 @@ end
 
 Drilling.HandleControls = function()
   local last_pos = Drilling.DrillPos
+
   if IsControlJustPressed(0,172) then
     Drilling.DrillPos = math.min(1.0,Drilling.DrillPos + 0.01)
   elseif IsControlPressed(0,172) then
@@ -59,6 +59,7 @@ Drilling.HandleControls = function()
   end
 
   local last_speed = Drilling.DrillSpeed
+
   if IsControlJustPressed(0,175) then
     Drilling.DrillSpeed = math.min(1.0,Drilling.DrillSpeed + 0.05)
   elseif IsControlPressed(0,175) then
@@ -69,34 +70,28 @@ Drilling.HandleControls = function()
     Drilling.DrillSpeed = math.max(0.0,Drilling.DrillSpeed - (0.5 * GetFrameTime()))
   end
 
-  local last_temp = Drilling.DrillTemp
-  if last_pos < Drilling.DrillPos then
-    if Drilling.DrillSpeed > 0.4 then
-      Drilling.DrillTemp = math.min(1.0,Drilling.DrillTemp + ((0.05 * GetFrameTime()) *  (Drilling.DrillSpeed * 10)))
-      Scaleforms.PopFloat(Drilling.Scaleform,"SET_DRILL_POSITION",Drilling.DrillPos)
-    else
-      if Drilling.DrillPos < 0.1 or Drilling.DrillPos < Drilling.HoleDepth then
-        Scaleforms.PopFloat(Drilling.Scaleform,"SET_DRILL_POSITION",Drilling.DrillPos)
-      else
-        Drilling.DrillPos = last_pos
-        Drilling.DrillTemp = math.min(1.0,Drilling.DrillTemp + (0.01 * GetFrameTime()))
-      end
-    end
-  else
-    if Drilling.DrillPos < Drilling.HoleDepth then
-      Drilling.DrillTemp = math.max(0.0,Drilling.DrillTemp - ( (0.05 * GetFrameTime()) *  math.max(0.005,(Drilling.DrillSpeed * 10) /2)) )
-    end
-
-    if Drilling.DrillPos ~= Drilling.HoleDepth then
-      Scaleforms.PopFloat(Drilling.Scaleform,"SET_DRILL_POSITION",Drilling.DrillPos)
-    end
-  end
-
   if last_speed ~= Drilling.DrillSpeed then
     Scaleforms.PopFloat(Drilling.Scaleform,"SET_SPEED",Drilling.DrillSpeed)
   end
 
-  if last_temp ~= Drilling.DrillTemp then    
+  local last_temp = Drilling.DrillTemp
+
+  if Drilling.DrillPos > Drilling.HoleDepth then
+    if Drilling.DrillSpeed > 0.1  then
+      Drilling.DrillTemp = math.min(1.0, Drilling.DrillTemp + ((1.0 * GetFrameTime()) * Drilling.DrillSpeed))
+      Drilling.HoleDepth = Drilling.DrillPos
+    else
+      Drilling.DrillPos = Drilling.HoleDepth
+    end
+  else
+    Drilling.DrillTemp = math.max(0.0, Drilling.DrillTemp - (1.0 * GetFrameTime()))
+  end
+
+  if Drilling.DrillPos ~= last_pos then
+    Scaleforms.PopFloat(Drilling.Scaleform,"SET_DRILL_POSITION",Drilling.DrillPos)
+  end
+
+  if last_temp ~= Drilling.DrillTemp then
     Scaleforms.PopFloat(Drilling.Scaleform,"SET_TEMPERATURE",Drilling.DrillTemp)
   end
 
@@ -107,8 +102,6 @@ Drilling.HandleControls = function()
     Drilling.Result = true
     Drilling.Active = false
   end
-
-  Drilling.HoleDepth = (Drilling.DrillPos > Drilling.HoleDepth and Drilling.DrillPos or Drilling.HoleDepth)
 end
 
 Drilling.DisableControls = function()
